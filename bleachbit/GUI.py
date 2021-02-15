@@ -249,7 +249,7 @@ class Bleachbit(Gtk.Application):
 
         # Quit the application through the idle loop to allow the worker
         # to delete the files.  Use the lowest priority because the worker
-        # uses the standard priority.  Otherwise, this will quit before
+        # uses the standard priority. Otherwise, this will quit before
         # the files are deleted.
         #
         # Rebuild a minimal bleachbit.ini when quitting
@@ -358,8 +358,9 @@ class Bleachbit(Gtk.Application):
                 application=self, title=APP_NAME, auto_exit=self._auto_exit)
         self._window.present()
         if self._shred_paths:
-            GLib.idle_add(GUI.shred_paths, self._window, self._shred_paths)
-            self._auto_exit = True
+            GLib.idle_add(GUI.shred_paths, self._window, self._shred_paths, False, True,
+              priority=GObject.PRIORITY_LOW)
+            #self._auto_exit = True
         if self._auto_exit:
             GLib.idle_add(self.quit,
                           priority=GObject.PRIORITY_LOW)
@@ -577,7 +578,7 @@ class GUI(Gtk.ApplicationWindow):
             self.cb_refresh_operations,
             self.set_windows10_theme)
 
-    def shred_paths(self, paths, shred_settings=False):
+    def shred_paths(self, paths, shred_settings=False, quit_when_done=False):
         """Shred file or folders
 
         When shredding_settings=True:
@@ -598,6 +599,10 @@ class GUI(Gtk.ApplicationWindow):
             # delete
             self.preview_or_run_operations(True, operations)
             return True
+        
+        if quit_when_done:
+            GLib.idle_add(self.close,
+                              priority=GObject.PRIORITY_LOW)
 
         # user aborted
         return False
@@ -722,7 +727,7 @@ class GUI(Gtk.ApplicationWindow):
         else:
             self.start_time = time.time()
             worker = self.worker.run()
-            GLib.idle_add(worker.__next__)
+            GLib.idle_add(worker.__next__, priority=GLib.PRIORITY_LOW)
 
     def worker_done(self, worker, really_delete):
         """Callback for when Worker is done"""
