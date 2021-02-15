@@ -23,7 +23,7 @@
 Test case for module GUI
 """
 
-import mock
+import unittest.mock as mock
 import os
 import unittest
 import time
@@ -32,7 +32,7 @@ import types
 try:
     import gi
     gi.require_version('Gtk', '3.0')
-    from gi.repository import Gtk
+    from gi.repository import Gtk, GLib, GObject
     from bleachbit.GUI import Bleachbit
     HAVE_GTK = True
 except ImportError:
@@ -197,6 +197,41 @@ class GUITestCase(common.BleachbitTestCase):
         notify('This is a test notification')
         import time
         time.sleep
+
+    def test_cb_shred_quit(self):
+        #app = Bleachbit(auto_exit=False, uac=False)
+        self.app.register()
+        self.app.activate()
+        self.app.get_windows()
+        self.app.cb_shred_quit(None, None)
+        self.refresh_gui()
+        self.app.get_windows()
+        i = 5
+        #app._window.
+
+        # change value in ini file so that it is different from its default value
+        # call cb_shred_quit
+        # check that the app is quit and the ini file is in its default state
+        # for example by checking that the changed value from the above step is different
+        # the question is how can we execute test code after the app really quits?
+
+        # in test_cb_shred_quit_second_part we can succesfuly check if the
+        # app has quit and the ini file has been reset to its default state
+        # but we need to guarantee that no other test (method of this class) has been called
+        # between test_cb_shred_quit and test_cb_shred_quit_second_part
+        #GLib.idle_add(self.test_cb_shred_quit_second_part, priority=GObject.PRIORITY_LOW)
+
+        #GLib.idle_add(self.app.register,
+                      #priority=GObject.PRIORITY_LOW)
+        #GLib.idle_add(self.app.activate,
+                      #priority=GObject.PRIORITY_LOW)
+        self.refresh_gui()
+        #while self.app.get_windows():
+            #pass
+
+        i = 5
+        #self.app.register()
+        #self.app.activate()
 
     @mock.patch('bleachbit.GuiBasic.delete_confirmation_dialog')
     def test_confirm_delete(self, mock_delete_confirmation_dialog):
