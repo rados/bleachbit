@@ -598,7 +598,8 @@ class GUI(Gtk.ApplicationWindow):
         if self._confirm_delete(False, shred_settings):
             # delete
             self.preview_or_run_operations(True, operations)
-            return True
+            if shred_settings:
+                return True
         
         if quit_when_done:
             GLib.idle_add(self.close,
