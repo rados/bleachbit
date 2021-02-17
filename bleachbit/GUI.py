@@ -728,7 +728,7 @@ class GUI(Gtk.ApplicationWindow):
         else:
             self.start_time = time.time()
             worker = self.worker.run()
-            GLib.idle_add(worker.__next__, priority=GLib.PRIORITY_LOW)
+            GLib.idle_add(worker.__next__)
 
     def worker_done(self, worker, really_delete):
         """Callback for when Worker is done"""
