@@ -31,6 +31,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+import winreg
 
 
 class BleachbitTestCase(unittest.TestCase):
@@ -127,6 +128,13 @@ class BleachbitTestCase(unittest.TestCase):
         if 'dir' not in kwargs:
             kwargs['dir'] = self.tempdir
         return tempfile.mkdtemp(**kwargs)
+    
+    def get_winregistry_value(self, key, subkey):
+        try:        
+            with winreg.OpenKey(key,  subkey) as hkey:
+                return winreg.QueryValue(hkey, None)
+        except FileNotFoundError:
+            return None
 
 
 def getTestPath(path):
