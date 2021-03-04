@@ -29,7 +29,8 @@ import sys
 import unittest
 import time
 import types
-import winreg
+if 'win32' == sys.platform:
+    import winreg
 
 try:
     import gi
