@@ -31,7 +31,8 @@ import shutil
 import sys
 import tempfile
 import unittest
-import winreg
+if 'win32' == sys.platform:
+    import winreg
 
 
 class BleachbitTestCase(unittest.TestCase):
