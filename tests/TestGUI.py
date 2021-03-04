@@ -28,6 +28,7 @@ import os
 import unittest
 import time
 import types
+import winreg
 
 try:
     import gi
@@ -44,6 +45,7 @@ from bleachbit.GuiPreferences import PreferencesDialog
 from bleachbit.Options import options, Options
 from bleachbit import Cleaner, CleanerML
 from bleachbit.Cleaner import backends
+from windows.setup_py2exe import SHRED_REGEX_KEY
 from tests import common
 
 bleachbit.online_update_notification_enabled = False
@@ -198,15 +200,15 @@ class GUITestCase(common.BleachbitTestCase):
         import time
         time.sleep
 
-    def test_cb_shred_quit(self):
+    #def test_cb_shred_quit(self):
         #app = Bleachbit(auto_exit=False, uac=False)
-        self.app.register()
-        self.app.activate()
-        self.app.get_windows()
-        self.app.cb_shred_quit(None, None)
-        self.refresh_gui()
-        self.app.get_windows()
-        i = 5
+        #self.app.register()
+        #self.app.activate()
+        #self.app.get_windows()
+        #self.app.cb_shred_quit(None, None)
+        #self.refresh_gui()
+        #self.app.get_windows()
+        
         #app._window.
 
         # change value in ini file so that it is different from its default value
@@ -225,11 +227,11 @@ class GUITestCase(common.BleachbitTestCase):
                       #priority=GObject.PRIORITY_LOW)
         #GLib.idle_add(self.app.activate,
                       #priority=GObject.PRIORITY_LOW)
-        self.refresh_gui()
+        #self.refresh_gui()
         #while self.app.get_windows():
             #pass
 
-        i = 5
+        
         #self.app.register()
         #self.app.activate()
 
