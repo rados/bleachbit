@@ -69,7 +69,8 @@ class GUITestCase(common.BleachbitTestCase):
         super(GUITestCase, GUITestCase).tearDownClass()
         common.put_env('LANGUAGE', cls.old_language)
     
-    #@common.skipUnlessWindows
+    @common.skipUnlessWindows
+    #unittest.skipUnless('win32' == sys.platform, 'not running on Windows')
     def test_windows_explorer_context_menu_command(self):
         def set_curdir_to_bleachbit():
             os.curdir = os.path.split(__file__)[0]
@@ -77,7 +78,7 @@ class GUITestCase(common.BleachbitTestCase):
             
         file_to_shred = self.mkstemp(prefix="file_to_shred_with_context_menu_command")
         self.assertExists(file_to_shred)
-        options.set('delete_confirmation', False, commit=False)
+        options.set('delete_confirmation', False) # recover original delete_confirmation value
         shred_command_key = '{}\\command'.format(SHRED_REGEX_KEY)
         shred_command_string = self.get_winregistry_value(winreg.HKEY_CLASSES_ROOT,  shred_command_key)
         
