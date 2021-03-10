@@ -70,6 +70,8 @@ class GUITestCase(common.BleachbitTestCase):
         common.put_env('LANGUAGE', cls.old_language)
     
     @common.skipUnlessWindows
+    #@common.change_property_value('delete_confirmation', False)
+    #unittest.skipUnless('win32' == sys.platform, 'not running on Windows')
     def test_windows_explorer_context_menu_command(self):
         def set_curdir_to_bleachbit():
             os.curdir = os.path.split(__file__)[0]
@@ -77,16 +79,21 @@ class GUITestCase(common.BleachbitTestCase):
             
         file_to_shred = self.mkstemp(prefix="file_to_shred_with_context_menu_command")
         self.assertExists(file_to_shred)
-        options.set('delete_confirmation', False) # recover original delete_confirmation value
         shred_command_key = '{}\\command'.format(SHRED_REGEX_KEY)
         shred_command_string = self.get_winregistry_value(winreg.HKEY_CLASSES_ROOT,  shred_command_key)
         
         if shred_command_string is None:
+            # Use main .py file when the application is not installed and there is no .exe file 
+            # and corresponding registry entry. 
             shred_command_string = r"{} bleachbit.py --gui --no-uac --shred {}".format(sys.executable, file_to_shred)
             set_curdir_to_bleachbit()
         else:
             self.assertTrue('"%1"' in shred_command_string)
             shred_command_string = shred_command_string.replace('"%1"', file_to_shred)
         
+        delete_confirmation_saved_state = options.get('delete_confirmation')
+        options.set('delete_confirmation', False)        
         os.system(shred_command_string)
+        options.set('delete_confirmation', delete_confirmation_saved_state)
+
         self.assertNotExists(file_to_shred)
