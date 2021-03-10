@@ -31,6 +31,7 @@ import time
 import types
 if 'win32' == sys.platform:
     import winreg
+    from windows.setup_py2exe import SHRED_REGEX_KEY
 
 try:
     import gi
@@ -70,9 +71,6 @@ class GUITestCase(common.BleachbitTestCase):
     
     @common.skipUnlessWindows
     def test_windows_explorer_context_menu_command(self):
-
-        from windows.setup_py2exe import SHRED_REGEX_KEY # to escape importing setup_py2exe under Linux
-
         def set_curdir_to_bleachbit():
             os.curdir = os.path.split(__file__)[0]
             os.curdir = os.path.split(os.curdir)[0]
