@@ -47,13 +47,11 @@ from bleachbit.GuiPreferences import PreferencesDialog
 from bleachbit.Options import options, Options
 from bleachbit import Cleaner, CleanerML
 from bleachbit.Cleaner import backends
-from windows.setup_py2exe import SHRED_REGEX_KEY
 from tests import common
 
 bleachbit.online_update_notification_enabled = False
 
 
-@unittest.skipUnless(HAVE_GTK, 'requires GTK+ module')
 class GUITestCase(common.BleachbitTestCase):
     """Test case for application level functions"""
     
@@ -71,8 +69,10 @@ class GUITestCase(common.BleachbitTestCase):
         common.put_env('LANGUAGE', cls.old_language)
     
     @common.skipUnlessWindows
-    #unittest.skipUnless('win32' == sys.platform, 'not running on Windows')
     def test_windows_explorer_context_menu_command(self):
+
+        from windows.setup_py2exe import SHRED_REGEX_KEY # to escape importing setup_py2exe under Linux
+
         def set_curdir_to_bleachbit():
             os.curdir = os.path.split(__file__)[0]
             os.curdir = os.path.split(os.curdir)[0]

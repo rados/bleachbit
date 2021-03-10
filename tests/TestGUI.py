@@ -28,7 +28,9 @@ import os
 import unittest
 import time
 import types
-import winreg
+import sys
+if 'win32' == sys.platform:
+    import winreg
 
 try:
     import gi
@@ -41,11 +43,8 @@ except ImportError:
 
 import bleachbit
 from bleachbit import _
-from bleachbit.GuiPreferences import PreferencesDialog
 from bleachbit.Options import options, Options
-from bleachbit import Cleaner, CleanerML
-from bleachbit.Cleaner import backends
-from windows.setup_py2exe import SHRED_REGEX_KEY
+
 from tests import common
 
 bleachbit.online_update_notification_enabled = False
