@@ -23,7 +23,7 @@
 Test case for module GUI
 """
 
-import unittest.mock as mock
+import mock
 import os
 import unittest
 import time
@@ -199,6 +199,7 @@ class GUITestCase(common.BleachbitTestCase):
         import time
         time.sleep
 
+    #@unittest.skip
     #def test_cb_shred_quit(self):
         #app = Bleachbit(auto_exit=False, uac=False)
         #self.app.register()
@@ -208,18 +209,18 @@ class GUITestCase(common.BleachbitTestCase):
         #self.refresh_gui()
         #self.app.get_windows()
         
-        #app._window.
+        ##app._window.
 
-        # change value in ini file so that it is different from its default value
-        # call cb_shred_quit
-        # check that the app is quit and the ini file is in its default state
-        # for example by checking that the changed value from the above step is different
-        # the question is how can we execute test code after the app really quits?
+        ##change value in mocked ini file (not the real one) so that it is different from its default value
+        ##call cb_shred_quit
+        ##check that the app is quit and the ini file is in its default state
+        ##for example by checking that the changed value from the above step is different
+        ##the question is how can we execute test code after the app really quits?
 
-        # in test_cb_shred_quit_second_part we can succesfuly check if the
-        # app has quit and the ini file has been reset to its default state
-        # but we need to guarantee that no other test (method of this class) has been called
-        # between test_cb_shred_quit and test_cb_shred_quit_second_part
+        ##in test_cb_shred_quit_second_part we can succesfuly check if the
+        ##app has quit and the ini file has been reset to its default state
+        ##but we need to guarantee that no other test (method of this class) has been called
+        ##between test_cb_shred_quit and test_cb_shred_quit_second_part
         #GLib.idle_add(self.test_cb_shred_quit_second_part, priority=GObject.PRIORITY_LOW)
 
         #GLib.idle_add(self.app.register,
@@ -230,9 +231,6 @@ class GUITestCase(common.BleachbitTestCase):
         #while self.app.get_windows():
             #pass
 
-        
-        #self.app.register()
-        #self.app.activate()
 
     @mock.patch('bleachbit.GuiBasic.delete_confirmation_dialog')
     def test_confirm_delete(self, mock_delete_confirmation_dialog):
