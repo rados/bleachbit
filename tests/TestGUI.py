@@ -208,7 +208,7 @@ class GUITestCase(common.BleachbitTestCase):
         #self.app.cb_shred_quit(None, None)
         #self.refresh_gui()
         #self.app.get_windows()
-        
+
         ##app._window.
 
         ##change value in mocked ini file (not the real one) so that it is different from its default value
@@ -230,7 +230,6 @@ class GUITestCase(common.BleachbitTestCase):
         #self.refresh_gui()
         #while self.app.get_windows():
             #pass
-
 
     @mock.patch('bleachbit.GuiBasic.delete_confirmation_dialog')
     def test_confirm_delete(self, mock_delete_confirmation_dialog):
