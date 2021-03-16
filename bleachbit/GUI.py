@@ -122,6 +122,10 @@ class Bleachbit(Gtk.Application):
         Gtk.Application.__init__(
             self, application_id='org.gnome.Bleachbit', flags=Gio.ApplicationFlags.FLAGS_NONE)
         GObject.threads_init()
+        
+        if auto_exit:
+            # This is used for automated testing of whether the GUI can start.
+            self._auto_exit = True        
 
         if shred_paths:
             self._shred_paths = shred_paths
@@ -139,9 +143,6 @@ class Bleachbit(Gtk.Application):
             except ImportError:
                 logger.exception(
                     _("Error loading the SQLite module: the antivirus software may be blocking it."))
-        if auto_exit:
-            # This is used for automated testing of whether the GUI can start.
-            self._auto_exit = True
 
     def build_app_menu(self):
         """Build the application menu
@@ -358,7 +359,7 @@ class Bleachbit(Gtk.Application):
                 application=self, title=APP_NAME, auto_exit=self._auto_exit)
         self._window.present()
         if self._shred_paths:
-            GLib.idle_add(GUI.shred_paths, self._window, self._shred_paths, False, True,
+            GLib.idle_add(GUI.shred_paths, self._window, self._shred_paths,# False, True,
               priority=GObject.PRIORITY_LOW)
             #self._auto_exit = True
         if self._auto_exit:
@@ -578,15 +579,16 @@ class GUI(Gtk.ApplicationWindow):
             self.cb_refresh_operations,
             self.set_windows10_theme)
 
-    def shred_paths(self, paths, shred_settings=False, quit_when_done=False):
+    def shred_paths(self, paths, shred_settings=False):
+                    #, quit_when_done=False):
         """Shred file or folders
 
         When shredding_settings=True:
         If user confirms to delete, then returns True.  If user aborts, returns
         False.
 
-        When quit_when_done=True:
-        Always returns False to remove function from the idle queue.
+#       When quit_when_done=True:
+#        Always returns False to remove function from the idle queue.
         """
         # create a temporary cleaner object
         backends['_gui'] = Cleaner.create_simple_cleaner(paths)
@@ -601,7 +603,7 @@ class GUI(Gtk.ApplicationWindow):
             if shred_settings:
                 return True
         
-        if quit_when_done:
+        if self.auto_exit: # consider adding leading underscore - self._auto_exit
             GLib.idle_add(self.close,
                               priority=GObject.PRIORITY_LOW)
 

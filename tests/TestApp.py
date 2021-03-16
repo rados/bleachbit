@@ -85,7 +85,7 @@ class GUITestCase(common.BleachbitTestCase):
         if shred_command_string is None:
             # Use main .py file when the application is not installed and there is no .exe file 
             # and corresponding registry entry. 
-            shred_command_string = r"{} bleachbit.py --gui --no-uac --shred {}".format(sys.executable, file_to_shred)
+            shred_command_string = r"{} bleachbit.py --gui --no-uac --shred --auto_exit {}".format(sys.executable, file_to_shred)
             set_curdir_to_bleachbit()
         else:
             self.assertTrue('"%1"' in shred_command_string)
@@ -95,5 +95,6 @@ class GUITestCase(common.BleachbitTestCase):
         options.set('delete_confirmation', False)        
         os.system(shred_command_string)
         options.set('delete_confirmation', delete_confirmation_saved_state)
-
+        
         self.assertNotExists(file_to_shred)
+        # todo: assert that the Bleachbit application has been closed after check with Andrew on auto_exit change in GUI.__init__
