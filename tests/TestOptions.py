@@ -108,6 +108,23 @@ class OptionsTestCase(common.BleachbitTestCase):
         self.assertNotExists(bleachbit.options_file)
         bleachbit.Options.init_configuration()
         self.assertExists(bleachbit.options_file)
+        
+    #def test_init_configuration(self):
+        #"""Test for init_configuration()"""
+        #existing_options_file_renamed = '{}\\{}_{}.ini'.format(self.tempdir, 'bleachbit', time.time())
+        #if os.path.exists(bleachbit.options_file):
+            #shutil.copyfile(bleachbit.options_file, existing_options_file_renamed)
+            #os.remove(bleachbit.options_file)
+
+        #self.assertNotExists(bleachbit.options_file)
+        #bleachbit.Options.init_configuration()
+        #self.assertExists(bleachbit.options_file)
+
+        #if os.path.exists(existing_options_file_renamed):
+            #os.remove(bleachbit.options_file)
+            #shutil.copyfile(existing_options_file_renamed, bleachbit.options_file)
+            #self.assertExists(bleachbit.options_file)
+            #bleachbit.Options.options.restore()        
 
     def test_is_corrupt(self):
         """Test is_corrupt()"""
