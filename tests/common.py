@@ -33,6 +33,7 @@ import tempfile
 import unittest
 if 'win32' == sys.platform:
     import winreg
+    import win32gui
 
 
 class BleachbitTestCase(unittest.TestCase):
@@ -129,13 +130,6 @@ class BleachbitTestCase(unittest.TestCase):
         if 'dir' not in kwargs:
             kwargs['dir'] = self.tempdir
         return tempfile.mkdtemp(**kwargs)
-    
-    def get_winregistry_value(self, key, subkey):
-        try:        
-            with winreg.OpenKey(key,  subkey) as hkey:
-                return winreg.QueryValue(hkey, None)
-        except FileNotFoundError:
-            return None
 
 
 def getTestPath(path):
@@ -219,3 +213,21 @@ def validate_result(self, result, really_delete=False):
             self.assertNotLExists(filename)
         else:
             self.assertLExists(filename)
+
+
+def get_winregistry_value(key, subkey):
+    try:        
+        with winreg.OpenKey(key,  subkey) as hkey:
+            return winreg.QueryValue(hkey, None)
+    except FileNotFoundError:
+        return None
+
+
+def get_opened_windows_titles():
+    opened_windows_titles = []
+    def enumerate_opened_windows_titles(hwnd, ctx):
+        if win32gui.IsWindowVisible(hwnd):
+            opened_windows_titles.append(win32gui.GetWindowText(hwnd))        
+
+    win32gui.EnumWindows(enumerate_opened_windows_titles, None)
+    return opened_windows_titles
