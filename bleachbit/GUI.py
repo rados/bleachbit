@@ -359,9 +359,7 @@ class Bleachbit(Gtk.Application):
                 application=self, title=APP_NAME, auto_exit=self._auto_exit)
         self._window.present()
         if self._shred_paths:
-            GLib.idle_add(GUI.shred_paths, self._window, self._shred_paths,# False, True,
-              priority=GObject.PRIORITY_LOW)
-            #self._auto_exit = True
+            GLib.idle_add(GUI.shred_paths, self._window, self._shred_paths, priority=GObject.PRIORITY_LOW)
         if self._auto_exit:
             GLib.idle_add(self.quit,
                           priority=GObject.PRIORITY_LOW)
@@ -538,7 +536,7 @@ class GUI(Gtk.ApplicationWindow):
     def __init__(self, auto_exit, *args, **kwargs):
         super(GUI, self).__init__(*args, **kwargs)
 
-        self.auto_exit = auto_exit
+        self._auto_exit = auto_exit
 
         self.set_wmclass(APP_NAME, APP_NAME)
         self.populate_window()
@@ -580,15 +578,11 @@ class GUI(Gtk.ApplicationWindow):
             self.set_windows10_theme)
 
     def shred_paths(self, paths, shred_settings=False):
-                    #, quit_when_done=False):
         """Shred file or folders
 
         When shredding_settings=True:
         If user confirms to delete, then returns True.  If user aborts, returns
         False.
-
-#       When quit_when_done=True:
-#        Always returns False to remove function from the idle queue.
         """
         # create a temporary cleaner object
         backends['_gui'] = Cleaner.create_simple_cleaner(paths)
@@ -602,8 +596,8 @@ class GUI(Gtk.ApplicationWindow):
             self.preview_or_run_operations(True, operations)
             if shred_settings:
                 return True
-        
-        if self.auto_exit: # consider adding leading underscore - self._auto_exit
+
+        if self._auto_exit:
             GLib.idle_add(self.close,
                               priority=GObject.PRIORITY_LOW)
 
@@ -771,7 +765,7 @@ class GUI(Gtk.ApplicationWindow):
     def cb_refresh_operations(self):
         """Callback to refresh the list of cleaners"""
         # Is this the first time in this session?
-        if not hasattr(self, 'recognized_cleanerml') and not self.auto_exit:
+        if not hasattr(self, 'recognized_cleanerml') and not self._auto_exit:
             from bleachbit import RecognizeCleanerML
             RecognizeCleanerML.RecognizeCleanerML()
             self.recognized_cleanerml = True
@@ -792,7 +786,7 @@ class GUI(Gtk.ApplicationWindow):
         self.view.expand_all()
 
         # Check for online updates.
-        if not self.auto_exit and \
+        if not self._auto_exit and \
             bleachbit.online_update_notification_enabled and \
             options.get("check_online_updates") and \
                 not hasattr(self, 'checked_for_updates'):
@@ -801,7 +795,7 @@ class GUI(Gtk.ApplicationWindow):
 
         # Show information for first start.
         # (The first start flag is set also for each new version.)
-        if options.get("first_start") and not self.auto_exit:
+        if options.get("first_start") and not self._auto_exit:
             if os.name == 'posix':
                 self.append_text(
                     _('Access the application menu by clicking the hamburger icon on the title bar.'))
