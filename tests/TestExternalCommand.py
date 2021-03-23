@@ -75,7 +75,8 @@ class ExternalCommandTestCase(common.BleachbitTestCase):
     def test_windows_explorer_context_menu_command(self):
         """Unit test for 'Shred with BleachBit' Windows Explorer context menu command"""
         
-        # This test could be interpreted as TestCLI->test_gui_no-uac_shred_exit 
+        # This test is more likely an integration test as it imitates use behavior.
+        # It could be interpreted as TestCLI->test_gui_no-uac_shred_exit 
         # but it is more explicit to have it here as a separate case.
         # It covers a single case where one file is shred without delete confirmation dialog.
 
