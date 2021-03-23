@@ -361,7 +361,7 @@ class Bleachbit(Gtk.Application):
         if self._shred_paths:
             GLib.idle_add(GUI.shred_paths, self._window, self._shred_paths, priority=GObject.PRIORITY_LOW)
             # When we shred paths and auto exit with the Windows Explorer context menu command we close the
-            # application in GUI.shred_paths, because if we close it from here we encounter some problems.
+            # application in GUI.shred_paths, because if it is closed from here there are problems.
             # Most probably this is something related with how GTK handles idle quit calls.
         elif self._auto_exit:
             GLib.idle_add(self.quit,

@@ -77,6 +77,7 @@ class ExternalCommandTestCase(common.BleachbitTestCase):
         
         # This test could be interpreted as TestCLI->test_gui_no-uac_shred_exit 
         # but it is more explicit to have it here as a separate case.
+        # It covers a single case where one file is shred without delete confirmation dialog.
 
         def set_curdir_to_bleachbit():
             os.curdir = os.path.split(__file__)[0]
