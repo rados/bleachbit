@@ -94,7 +94,6 @@ class Options:
         self.config.optionxform = str  # make keys case sensitive for hashpath purging
         self.config.BOOLEAN_STATES['t'] = True
         self.config.BOOLEAN_STATES['f'] = False
-        self.restore()
 
     def __flush(self):
         """Write information to disk"""
@@ -379,6 +378,7 @@ class Options:
 
 
 options = Options()
+options.restore()
 
 # Now that the configuration is loaded, honor the debug preference there.
 set_root_log_level()

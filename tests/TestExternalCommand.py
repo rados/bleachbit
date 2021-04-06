@@ -93,7 +93,7 @@ class ExternalCommandTestCase(common.BleachbitTestCase):
         if shred_command_string is None:
             # Use main .py file when the application is not installed and there is no .exe file
             # and corresponding registry entry.
-            shred_command_string = r'{} bleachbit.py --gui --no-uac --shred --exit "{}"'.format(sys.executable,
+            shred_command_string = r'{} bleachbit.py --gui --no-uac --exit --shred "{}"'.format(sys.executable,
                                                                                                 file_to_shred)
             set_curdir_to_bleachbit()
         else:

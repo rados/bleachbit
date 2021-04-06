@@ -24,6 +24,7 @@ Common code for unit tests
 
 from bleachbit.FileUtilities import extended_path
 from bleachbit.General import sudo_mode
+import bleachbit
 
 import functools
 import os
@@ -44,9 +45,10 @@ class BleachbitTestCase(unittest.TestCase):
         """Create a temporary directory for the testcase"""
         cls.tempdir = tempfile.mkdtemp(prefix=cls.__name__)
         print(cls.tempdir)
-        existing_options_file_renamed = '{}\\{}_{}.ini'.format(cls.tempdir, 'bleachbit_ini', time.time())
-        shutil.copyfile(original_options_file, existing_options_file_renamed)
-        bleachbit.options_file = existing_options_file_renamed
+        #existing_options_file_renamed = '{}\\{}_{}.ini'.format(cls.tempdir, 'bleachbit_ini', time.time())
+        #shutil.copyfile(original_options_file, existing_options_file_renamed)
+        bleachbit.options_dir = cls.tempdir
+        bleachbit.Options.init_configuration()
 
     @classmethod
     def tearDownClass(cls):

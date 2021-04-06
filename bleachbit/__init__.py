@@ -102,6 +102,8 @@ elif 'nt' == os.name:
     else:
         # installed mode
         options_dir = os.path.expandvars(r"${APPDATA}\BleachBit")
+    
+
 options_file = os.path.join(options_dir, "bleachbit.ini")
 
 # check whether the application is running from the source tree

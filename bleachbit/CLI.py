@@ -143,7 +143,7 @@ def process_cmd_line():
                       help=_("launch the graphical interface"))
     parser.add_option('--exit', action='store_true',
                       help=optparse.SUPPRESS_HELP)
-    parser.add_option('--options-dir', action='store_true',
+    parser.add_option('--options-dir', #action='store_true',
                       help=_("when executing unit tests, sets the directory containing the ini files"))
     if 'nt' == os.name:
         uac_help = _("do not prompt for administrator privileges")
@@ -237,6 +237,8 @@ There is NO WARRANTY, to the extent permitted by law.""" % APP_VERSION)
     if options.clean:
         preview_or_clean(operations, True)
         sys.exit(0)
+    if options.options_dir:
+        pass
     if options.gui:
         import bleachbit.GUI
         app = bleachbit.GUI.Bleachbit(
@@ -249,8 +251,6 @@ There is NO WARRANTY, to the extent permitted by law.""" % APP_VERSION)
         operations = {'_gui': ['files']}
         preview_or_clean(operations, True)
         sys.exit(0)
-    if options.options_dir:
-        bleachbit.options_dir = args
     if options.sysinfo:
         print(Diagnostic.diagnostic_info())
         sys.exit(0)
