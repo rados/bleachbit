@@ -25,6 +25,10 @@ Launcher
 import os
 import sys
 
+with open('argvlog.txt', 'a') as f:
+    f.write(str(sys.argv) + '\n')
+    
+
 if 'posix' == os.name:
     if os.path.isdir('/usr/share/bleachbit'):
         # This path contains bleachbit/{C,G}LI.py .  This section is
