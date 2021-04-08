@@ -124,8 +124,19 @@ class Bleachbit(Gtk.Application):
             if portable_mode:
                 Windows.copy_fonts_in_portable_app(auto_exit)
 
+        if os.name == 'nt' and Windows.elevate_privileges(uac):
+            # privileges escalated in other process
+            sys.exit(0)
+
+        application_id = 'org.gnome.Bleachbit'
+        if auto_exit and shred_paths:
+            # When we have a running application and executing theWindows context menu command 
+            # we start a new process with new id, otherwise the command line arguments are not 
+            # passed to the already running instance.
+            application_id += 'ContextMenuShred'
+
         Gtk.Application.__init__(
-            self, application_id='org.gnome.Bleachbit', flags=Gio.ApplicationFlags.FLAGS_NONE)
+            self, application_id=application_id, flags=Gio.ApplicationFlags.FLAGS_NONE)
         GObject.threads_init()
         
         if auto_exit:
