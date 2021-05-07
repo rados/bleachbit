@@ -24,9 +24,11 @@ Launcher
 
 import os
 import sys
+import datetime
 
 with open('argvlog.txt', 'a') as f:
-    f.write(str(sys.argv) + '\n')
+    time_now = datetime.datetime.now()
+    f.write('{} --- {}'.format(time_now, str(sys.argv) + '\n'))
     
 
 if 'posix' == os.name:
