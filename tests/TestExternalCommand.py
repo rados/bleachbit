@@ -94,20 +94,11 @@ class ExternalCommandTestCase(common.BleachbitTestCase):
             any(['BleachBit' == window_title for window_title in opened_windows_titles]))
 
     def _get_shred_command_string(self, file_to_shred, set_curdir_to_bleachbit):
-        shred_command_key = '{}\\command'.format(SHRED_REGEX_KEY)
-        shred_command_string = common.get_winregistry_value(
-            winreg.HKEY_CLASSES_ROOT,  shred_command_key)
-
-        if shred_command_string is None:
-            # Use main .py file when the application is not installed and there is no .exe file
-            # and corresponding registry entry.
-            shred_command_string = r'{} bleachbit.py --gui --no-uac --shred --exit "{}"'.format(sys.executable,
-                                                                                                file_to_shred)
-            set_curdir_to_bleachbit()
-        else:
-            self.assertTrue('"%1"' in shred_command_string)
-            shred_command_string = shred_command_string.replace(
-                '""%1""', file_to_shred)
+        # Use main .py file when the application is not installed and there is no .exe file
+        # and corresponding registry entry.
+        shred_command_string = r'{} bleachbit.py --gui --no-uac --shred --exit "{}"'.format(sys.executable,
+                                                                                            file_to_shred)
+        set_curdir_to_bleachbit()
         return shred_command_string
 
     def _run_shred_command(self, shred_command_string):
