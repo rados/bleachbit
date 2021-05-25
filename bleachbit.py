@@ -24,7 +24,6 @@ Launcher
 
 import os
 import sys
-import datetime
 
 
 if 'posix' == os.name:

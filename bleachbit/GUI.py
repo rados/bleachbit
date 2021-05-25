@@ -373,7 +373,6 @@ class Bleachbit(Gtk.Application):
             self._window = GUI(
                 application=self, title=APP_NAME, auto_exit=self._auto_exit)
         self._window.present()
-        self._window.append_text('\n\n{}\n\n'.format(str(sys.argv)))
         if self._shred_paths:
             GLib.idle_add(GUI.shred_paths, self._window, self._shred_paths, priority=GObject.PRIORITY_LOW)
             # When we shred paths and auto exit with the Windows Explorer context menu command we close the
