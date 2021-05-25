@@ -117,6 +117,7 @@ class Bleachbit(Gtk.Application):
 
     def __init__(self, uac=True, shred_paths=None, auto_exit=False):
 
+        application_id_suffix = ''
         if os.name == 'nt':
             if Windows.elevate_privileges(uac):
                 # privileges escalated in other process
@@ -124,17 +125,18 @@ class Bleachbit(Gtk.Application):
             if portable_mode:
                 Windows.copy_fonts_in_portable_app(auto_exit)
 
-        application_id = 'org.gnome.Bleachbit'
-        if auto_exit and shred_paths:
-            # When we have a running application and executing theWindows context menu command 
-            # we start a new process with new id, otherwise the command line arguments are not
-            # passed to the already running instance.
-            application_id += 'ContextMenuShred'
+            if auto_exit and shred_paths:
+                # When we have a running application and executing the Windows
+                # context menu command we start a new process with new application_id.
+                # That is because the command line arguments of the context menu command
+                # are not passed to the already running instance.
+                application_id_suffix = 'ContextMenuShred'
 
+        application_id = '{}{}'.format('org.gnome.Bleachbit', application_id_suffix)
         Gtk.Application.__init__(
             self, application_id=application_id, flags=Gio.ApplicationFlags.FLAGS_NONE)
         GObject.threads_init()
-        
+
         if auto_exit:
             # This is used for automated testing of whether the GUI can start.
             # It is called from assert_execute_console() in windows/setup_py2exe.py

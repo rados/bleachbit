@@ -26,10 +26,6 @@ import os
 import sys
 import datetime
 
-with open('argvlog.txt', 'a') as f:
-    time_now = datetime.datetime.now()
-    f.write('{} --- {}'.format(time_now, str(sys.argv) + '\n'))
-    
 
 if 'posix' == os.name:
     if os.path.isdir('/usr/share/bleachbit'):
