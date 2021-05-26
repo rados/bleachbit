@@ -117,7 +117,7 @@ class Bleachbit(Gtk.Application):
 
     def __init__(self, uac=True, shred_paths=None, auto_exit=False):
 
-        application_id_suffix = self._init_windows_related(auto_exit, shred_paths, uac)
+        application_id_suffix = self._init_windows_misc(auto_exit, shred_paths, uac)
         application_id = '{}{}'.format('org.gnome.Bleachbit', application_id_suffix)
         Gtk.Application.__init__(
             self, application_id=application_id, flags=Gio.ApplicationFlags.FLAGS_NONE)
@@ -145,7 +145,7 @@ class Bleachbit(Gtk.Application):
                 logger.exception(
                     _("Error loading the SQLite module: the antivirus software may be blocking it."))
 
-    def _init_windows_related(self, auto_exit, shred_paths, uac):
+    def _init_windows_misc(self, auto_exit, shred_paths, uac):
         application_id_suffix = ''
         if os.name == 'nt':
             if Windows.elevate_privileges(uac):
