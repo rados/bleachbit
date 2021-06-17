@@ -23,9 +23,7 @@ Test cases for module Winapp
 
 import os
 import shutil
-import sys
 import tempfile
-import unittest
 
 from tests import common
 from bleachbit.Winapp import Winapp, detectos, detect_file, section2option
@@ -168,9 +166,6 @@ class WinappTestCase(common.BleachbitTestCase):
         fname1 = os.path.join(dirname, f1_filename or 'deleteme.log')
         open(fname1, 'w').close()
 
-        fname11 = os.path.join(dirname, f1_filename or 'mydeleteme.log')
-        open(fname11, 'w').close()
-
         dirname2 = os.path.join(dirname, 'sub')
         os.mkdir(dirname2)
         fname2 = os.path.join(dirname2, 'deleteme.log')
@@ -180,7 +175,6 @@ class WinappTestCase(common.BleachbitTestCase):
         open(fbak, 'w').close()
 
         self.assertExists(fname1)
-        self.assertExists(fname11)
         self.assertExists(fname2)
         self.assertExists(fbak)
 
@@ -342,59 +336,76 @@ class WinappTestCase(common.BleachbitTestCase):
         # 1 = .\deleteme.log should exist
         # 2 = .\deleteme.bak should exist
         # 3 = sub\deleteme.log should exist
-        # 4 = .\mydeleteme.log should exist
 
         tests = (
             # delete everything in single directory (no children) without
             # exclusions
-            ('FileKey1=%(d)s|deleteme.*', False, False, True, True),
+            ('FileKey1=%(d)s|deleteme.*', False, False, True),
             # delete everything in single directory using environment variable
-            ('FileKey1=%%bbtestdir%%|deleteme.*', False, False, True, True),
+            ('FileKey1=%%bbtestdir%%|deleteme.*', False, False, True),
             # delete everything in parent and child directories without
             # exclusions
-            ('FileKey1=%(d)s|deleteme.*|RECURSE', False, False, False, True),
+            ('FileKey1=%(d)s|deleteme.*|RECURSE', False, False, False),
+            # don't delete files containing the described file name
+            ('FileKey1=%(d)s|eteme.*|RECURSE', True, True, True),
+            # delete a pattern sub folder included
+            ('FileKey1=%(d)s|*eteme.*|RECURSE', False, False, False),
+            # delete a pattern sub folder not included
+            ('FileKey1=%(d)s|*eteme.*', False, False, True),
             # exclude log delimited by pipe
             ('FileKey1=%(d)s|deleteme.*\nExcludeKey1=FILE|%(d)s|deleteme.log',
-             True, False, True, True),
-            ('FileKey1=%(d)s|*deleteme.*\nExcludeKey1=FILE|%(d)s|deleteme.log',
-             True, False, True, False),
+             True, False, True),
+            # delete / exclude patterns with different complexity
+            ('FileKey1=%(d)s|*eteme.*\nExcludeKey1=FILE|%(d)s|deleteme.log',
+             True, False, True),
+            ('FileKey1=%(d)s|*ete*.*\nExcludeKey1=PATH|%(d)s|*ete*.lo?',
+             True, False, True),
+            ('FileKey1=%(d)s|*eteme*\nExcludeKey1=PATH|%(d)s|*notexist.*',
+             False, False, True),
+            ('FileKey1=%(d)s|*eteme.log\nExcludeKey1=PATH|%(d)s|do*.log',
+             False, True, True),
+            # semicolon separates different file types
+            ('FileKey1=%(d)s|*.log;*.bak|RECURSE\nExcludeKey1=PATH|%(d)s|*.log',
+             True, False, True),
             # exclude log without pipe delimiter
             ('FileKey1=%(d)s|deleteme.*\nExcludeKey1=FILE|%(d)s\deleteme.log',
-             True, False, True, True),
+             True, False, True),
             # exclude everything in folder
             ('FileKey1=%(d)s|deleteme.*\nExcludeKey1=PATH|%(d)s|*.*',
-             True, True, True, True),
+             True, True, True),
             ('FileKey1=%(d)s|deleteme.*|RECURSE\nExcludeKey1=PATH|%(d)s|*.*',
-             True, True, True, True),
+             True, True, True),
+            ('FileKey1=%(d)s|*.*|RECURSE\nExcludeKey1=PATH|%(d)s|*.*',
+             True, True, True),
             ('FileKey1=%(d)s|deleteme.*\nExcludeKey1=PATH|%(d)s',
-             True, True, True, True),
+             True, True, True),
             # exclude everything in folder using environment variable
             # use double %% to escape
             ('FileKey1=%(d)s|deleteme.*\nExcludeKey1=PATH|%%bbtestdir%%|*.*',
-             True, True, True, True),
+             True, True, True),
             # exclude sub-folder
             ('FileKey1=%(d)s|deleteme.*\nExcludeKey1=PATH|%(d)s\sub',
-             False, False, True, True),
+             False, False, True),
             # exclude multiple file types that do not exist
             ('FileKey1=%(d)s|deleteme.*\nExcludeKey1=PATH|%(d)s|*.exe;*.dll',
-             False, False, True, True),
+             False, False, True),
             # exclude multiple file types that do exist, so dlete nothing
             ('FileKey1=%(d)s|deleteme.*\nExcludeKey1=PATH|%(d)s|*.bak;*.log',
-             True, True, True, True),
+             True, True, True),
             ('FileKey1=%(d)s|deleteme.*|RECURSE\nExcludeKey1=PATH|%(d)s|*.bak;*.log',
-             True, True, True, True),
+             True, True, True),
             # multiple ExcludeKey, neither of which should do anything
             ('FileKey1=%(d)s|deleteme.*|RECURSE\nExcludeKey1=PATH|c:\\doesnotexist|*.*\nExcludeKey2=PATH|c:\\alsodoesnotexist|*.*',
-             False, False, False, True),
+             False, False, False),
             # multiple ExcludeKey, the first should work
             ('FileKey1=%(d)s|deleteme.*|RECURSE\nExcludeKey1=PATH|%(d)s|*.log\nExcludeKey2=PATH|c:\\alsodoesnotexist\|*.*',
-             True, False, True, True),
+             True, False, True),
             # multiple ExcludeKey, both should work
             ('FileKey1=%(d)s|deleteme.*|RECURSE\nExcludeKey1=PATH|%(d)s|*.log\nExcludeKey2=PATH|%(d)s|*.bak',
-             True, True, True, True),
+             True, True, True),
             # glob should exclude the directory called 'sub'
             ('FileKey1=%(d)s|*.*\nExcludeKey1=PATH|%(d)s\s*',
-             False, False, True, False),
+             False, False, True),
         )
 
         for test in tests:
@@ -415,7 +426,6 @@ class WinappTestCase(common.BleachbitTestCase):
             self.assertCondExists(test[2], r'%s\deleteme.bak' % dirname, msg)
             self.assertCondExists(
                 test[3], r'%s\sub\deleteme.log' % dirname, msg)
-            self.assertCondExists(test[4], r'%s\mydeleteme.log' % dirname, msg)
 
             # cleanup
             shutil.rmtree(dirname, True)
