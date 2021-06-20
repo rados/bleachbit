@@ -412,6 +412,11 @@ class WinappTestCase(common.BleachbitTestCase):
             # glob should exclude the directory called 'sub'
             ('FileKey1=%(d)s|*.*\nExcludeKey1=PATH|%(d)s\s*',
              False, False, True),
+            # excludekey registry case
+            ('FileKey1=%(d)s|*.*\nExcludeKey1=REG|{}'.format(KEYFULL),
+             True, True, True),
+            ('FileKey1=%(d)s|*.*|RECURSE\nExcludeKey1=REG|{}_donotexist'.format(KEYFULL),
+             False, False, False),
         )
 
         for test in tests:

@@ -214,7 +214,8 @@ class Winapp:
         parts = excludekey.split('|')
         parts[0] = parts[0].upper()
         if parts[0] == 'REG':
-            raise NotImplementedError('REG not supported in ExcludeKey')
+            return parts[1]
+            # raise NotImplementedError('REG not supported in ExcludeKey')
 
         # the last part contains the filename(s)
         files = None

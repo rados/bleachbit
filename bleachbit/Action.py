@@ -25,6 +25,7 @@ Actions that perform cleaning
 
 from bleachbit import Command, FileUtilities, General, Special, DeepScan
 from bleachbit import _, fs_scan_re_flags
+from bleachbit.Windows import detect_registry_key
 
 import glob
 import logging
@@ -217,6 +218,14 @@ class FileActionProvider(ActionProvider):
 
             if wholeregex and not wholeregex_c_search(path):
                 continue
+
+            try:
+                registry_key_exists = detect_registry_key(nwholeregex)
+            except:#(RuntimeError, AssertionError):
+                pass
+            else:
+                if registry_key_exists:
+                    continue
 
             if nwholeregex and nwholeregex_c_search(path):
                 continue
