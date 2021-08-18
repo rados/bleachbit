@@ -278,12 +278,14 @@ def detect_registry_key(parent_key):
     return True
 
 
-def elevate_privileges(uac):
+def elevate_privileges(uac, context_menu_path):
     """On Windows Vista and later, try to get administrator
     privileges.  If successful, return True (so original process
     can exit).  If failed or not applicable, return False."""
 
+    print('elevate_privileges -> starts')
     if shell.IsUserAnAdmin():
+        print('elevate_privileges -> user is admin')
         logger.debug('already an admin (UAC not required)')
         htoken = win32security.OpenProcessToken(
             win32api.GetCurrentProcess(), win32security.TOKEN_ADJUST_PRIVILEGES | win32security.TOKEN_QUERY)
@@ -300,7 +302,7 @@ def elevate_privileges(uac):
     if hasattr(sys, 'frozen'):
         # running frozen in py2exe
         exe = sys.executable
-        parameters = "--gui --no-uac"
+        parameters = "--gui"
     else:
         pyfile = os.path.join(bleachbit.bleachbit_exe_path, 'bleachbit.py')
         # If the Python file is on a network drive, do not offer the UAC because
@@ -310,17 +312,28 @@ def elevate_privileges(uac):
             logger.debug(
                 "debug: skipping UAC because '%s' is on network", pyfile)
             return False
-        parameters = '"%s" --gui --no-uac' % pyfile
+        parameters = '"%s" --gui' % pyfile
         exe = sys.executable
 
     # add any command line parameters such as --debug-log
-    parameters = "%s %s" % (parameters, ' '.join(sys.argv[1:]))
+    # bellow fix puts the bleachbit.exe / py for shredding if not started from context menu
+    # it was added with commit: "Windows: fix endless startup loop when running with standard (non-administrator) account with UAC disabled (LP#819392)"
+    if context_menu_path:
+        parameters = "%s %s" % (parameters, '--context-menu "{}"'.format(context_menu_path))
+    else:
+        parameters = "%s %s" % (parameters, ' '.join(sys.argv[1:]))
+
+    print('parameters =', parameters)
+    import winsound
+    frequency = 2500  # Set Frequency To 2500 Hertz
+    duration = 50  # Set Duration To 1000 ms == 1 second
+    winsound.Beep(frequency, duration)
 
     logger.debug('elevate_privileges() exe=%s, parameters=%s', exe, parameters)
 
     rc = None
     try:
-        rc = shell.ShellExecuteEx(lpVerb='runas',
+        rc = shell.ShellExecuteEx(lpVerb='open',
                                   lpFile=exe,
                                   lpParameters=parameters,
                                   nShow=win32con.SW_SHOW)
