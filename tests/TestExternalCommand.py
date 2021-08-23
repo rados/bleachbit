@@ -109,21 +109,31 @@ class ExternalCommandTestCase(common.BleachbitTestCase):
             common.put_env('BLEACHBIT_TEST_OPTIONS_DIR', None)
 
     def test_windows_explorer_context_menu_command(self):
-        # for test_with_admin_user in [True, False]:
-            # if test_with_admin_user:
-            #     for fn_prefix in ('file_to_shred_with_context_menu_command', 'embedded space'):
-            #         self._context_helper(fn_prefix)
+        for test_with_admin_user in [True]:#, False]:
+            if test_with_admin_user:
+                for fn_prefix in ('file_to_shred_with_context_menu_command', 'embedded space'):
+                    self._context_helper(fn_prefix)
             # else:
-        import win32com
-            # with mock.patch('bleachbit.Windows.shell.IsUserAnAdmin', return_value=False):
-        # with mock.patch('win32com.shell.shell.IsUserAnAdmin', return_value=False):
-        #     for fn_prefix in ('file_to_shred_with_context_menu_command', 'embedded space'):
-        #         self._context_helper(fn_prefix)
+            #     with mock.patch('bleachbit.Windows.shell.IsUserAnAdmin', return_value=False):
+            #     with mock.patch('win32com.shell.shell.IsUserAnAdmin', return_value=False):
+            #         for fn_prefix in ('file_to_shred_with_context_menu_command', 'embedded space'):
+            #             self._context_helper(fn_prefix)
 
 
-        shred_command_string = 'runas /trustlevel:0x20000 "{} bleachbit.py --gui"'.format(sys.executable)
-        os.system(shred_command_string)
-    # def test_context_menu_command_while_the_app_is_running(self):
-    #     p = subprocess.Popen([sys.executable, 'bleachbit.py'], shell=False)
-    #     self._context_helper('while_app_is_running', allow_opened_window=True)
-    #     subprocess.Popen.kill(p)
+        # shred_command_string = 'runas /trustlevel:0x20000 "{} bleachbit.py --gui"'.format(sys.executable)
+        # os.system(shred_command_string)
+
+        # from win32com.shell import shell, shellcon
+        # import win32con
+        # exe = sys.executable
+        # parameters = 'bleachbit.py --gui'
+        # rc = shell.ShellExecuteEx(lpVerb='open',
+        #                           lpFile=exe,
+        #                           lpParameters=parameters,
+        #                           nShow=win32con.SW_SHOW)
+
+
+    def test_context_menu_command_while_the_app_is_running(self):
+        p = subprocess.Popen([sys.executable, 'bleachbit.py'], shell=False)
+        self._context_helper('while_app_is_running', allow_opened_window=True)
+        subprocess.Popen.kill(p)

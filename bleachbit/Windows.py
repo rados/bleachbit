@@ -284,6 +284,7 @@ def elevate_privileges(uac, context_menu_path):
     can exit).  If failed or not applicable, return False."""
 
     print('elevate_privileges -> starts')
+    print('context_menu_path', context_menu_path)
     if shell.IsUserAnAdmin():
         print('elevate_privileges -> user is admin')
         logger.debug('already an admin (UAC not required)')
@@ -297,13 +298,35 @@ def elevate_privileges(uac, context_menu_path):
         win32file.CloseHandle(htoken)
         return False
     elif not uac:
+        print('elevate_privileges -> not uac')
         return False
 
-    if hasattr(sys, 'frozen'):
-        # running frozen in py2exe
-        exe = sys.executable
-        parameters = "--gui"
-    else:
+    exe = sys.executable
+    # if hasattr(sys, 'frozen'):
+    #     # running frozen in py2exe
+    #     if context_menu_path:
+    #         parameters = '--context-menu "{}"'.format(context_menu_path)
+    #     else:
+    #         # add any command line parameters such as --debug-log
+    #         parameters = '--gui {}'.format(' '.join(sys.argv[1:]))
+    # else:
+    #     pyfile = os.path.join(bleachbit.bleachbit_exe_path, 'bleachbit.py')
+    #     # If the Python file is on a network drive, do not offer the UAC because
+    #     # the administrator may not have privileges and user will not be
+    #     # prompted.
+    #     if len(pyfile) > 0 and path_on_network(pyfile):
+    #         logger.debug(
+    #             "debug: skipping UAC because '%s' is on network", pyfile)
+    #         return False
+    #     if context_menu_path:
+    #         parameters = '"{}" --context-menu "{}"'.format(pyfile, context_menu_path)
+    #     else:
+    #         # add any command line parameters such as --debug-log
+    #         parameters = '"{}" --gui {}'.format(pyfile, ' '.join(sys.argv[1:]))
+
+
+    pyfile = ''
+    if not hasattr(sys, 'frozen'):
         pyfile = os.path.join(bleachbit.bleachbit_exe_path, 'bleachbit.py')
         # If the Python file is on a network drive, do not offer the UAC because
         # the administrator may not have privileges and user will not be
@@ -312,16 +335,13 @@ def elevate_privileges(uac, context_menu_path):
             logger.debug(
                 "debug: skipping UAC because '%s' is on network", pyfile)
             return False
-        parameters = '"%s" --gui' % pyfile
-        exe = sys.executable
 
-    # add any command line parameters such as --debug-log
-    # bellow fix puts the bleachbit.exe / py for shredding if not started from context menu
-    # it was added with commit: "Windows: fix endless startup loop when running with standard (non-administrator) account with UAC disabled (LP#819392)"
+    pyfile_as_parameter = '"{}" '.format(pyfile) if pyfile else ''
     if context_menu_path:
-        parameters = "%s %s" % (parameters, '--context-menu "{}"'.format(context_menu_path))
+        parameters = '{}--context-menu "{}"'.format(pyfile_as_parameter, context_menu_path)
     else:
-        parameters = "%s %s" % (parameters, ' '.join(sys.argv[1:]))
+        # add any command line parameters such as --debug-log
+        parameters = '{}--gui {}'.format(pyfile_as_parameter, ' '.join(sys.argv[1:]))
 
     print('parameters =', parameters)
     import winsound
@@ -333,7 +353,7 @@ def elevate_privileges(uac, context_menu_path):
 
     rc = None
     try:
-        rc = shell.ShellExecuteEx(lpVerb='open',
+        rc = shell.ShellExecuteEx(lpVerb='runas',
                                   lpFile=exe,
                                   lpParameters=parameters,
                                   nShow=win32con.SW_SHOW)

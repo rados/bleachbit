@@ -149,7 +149,7 @@ class Bleachbit(Gtk.Application):
         application_id_suffix = ''
         is_context_menu_executed = auto_exit and shred_paths
         if os.name == 'nt':
-            context_menu_path = shred_paths if is_context_menu_executed else None
+            context_menu_path = shred_paths[0] if is_context_menu_executed else None
             if Windows.elevate_privileges(uac, context_menu_path):
                 # privileges escalated in other process
                 sys.exit(0)
