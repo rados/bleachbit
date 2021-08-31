@@ -110,28 +110,8 @@ class ExternalCommandTestCase(common.BleachbitTestCase):
 
     @SkipTest
     def test_windows_explorer_context_menu_command(self):
-        for test_with_admin_user in [True]:#, False]:
-            if test_with_admin_user:
-                for fn_prefix in ('file_to_shred_with_context_menu_command', 'embedded space'):
-                    self._context_helper(fn_prefix)
-            # else:
-            #     with mock.patch('bleachbit.Windows.shell.IsUserAnAdmin', return_value=False):
-            #     with mock.patch('win32com.shell.shell.IsUserAnAdmin', return_value=False):
-            #         for fn_prefix in ('file_to_shred_with_context_menu_command', 'embedded space'):
-            #             self._context_helper(fn_prefix)
-
-
-        # shred_command_string = 'runas /trustlevel:0x20000 "{} bleachbit.py --gui"'.format(sys.executable)
-        # os.system(shred_command_string)
-
-        # from win32com.shell import shell, shellcon
-        # import win32con
-        # exe = sys.executable
-        # parameters = 'bleachbit.py --gui'
-        # rc = shell.ShellExecuteEx(lpVerb='open',
-        #                           lpFile=exe,
-        #                           lpParameters=parameters,
-        #                           nShow=win32con.SW_SHOW)
+        for fn_prefix in ('file_to_shred_with_context_menu_command', 'embedded space'):
+            self._context_helper(fn_prefix)
 
     @SkipTest
     def test_context_menu_command_while_the_app_is_running(self):
@@ -139,31 +119,22 @@ class ExternalCommandTestCase(common.BleachbitTestCase):
         self._context_helper('while_app_is_running', allow_opened_window=True)
         subprocess.Popen.kill(p)
 
-    def test_elevate_privileges_with_uac_and_context_menu_path(self):
-        import time
+    def test_as_non_admin_with_context_menu_path(self):
+        """
+        This tests covers elevate_privileges in the case where we pretend that we are not admin.
+        """
         from bleachbit.Options import options
-
-        def refresh_gui(delay=0):
-            while Gtk.events_pending():
-                Gtk.main_iteration_do(blocking=False)
-            time.sleep(delay)
 
         file_to_shred = self.mkstemp(prefix='elevate')
         self.assertExists(file_to_shred)
 
-        # with mock.patch.multiple(
-        #         'windows.NsisUtilities',
-        #         _DIRECTORY_TO_WALK=folder0,
-        #         _DIRECTORY_PREFIX_FOR_NSIS='',
-        #         _DIRECTORY_TO_SEPARATE=os.path.join(folder0, tree[-2][0])
-        # ):
-        # with mock.patch('bleachbit.GUI.GUI._confirm_delete', return_value=True):
-
         original = bleachbit.Windows.shell.ShellExecuteEx
         def shell_execute_synchronous(lpVerb='', lpFile='', lpParameters='', nShow=''):
+            """
+            We need a synchronous call the ShellExecuteEx so we can assert after it finishes.
+            """
             from win32com.shell import shell, shellcon
             import win32event
-            import win32process
 
             bleachbit.Windows.shell.ShellExecuteEx = original
             rc = shell.ShellExecuteEx(lpVerb=lpVerb,
@@ -174,20 +145,14 @@ class ExternalCommandTestCase(common.BleachbitTestCase):
                                       )
             hproc = rc['hProcess']
             win32event.WaitForSingleObject(hproc, win32event.INFINITE)
-            exit_code = win32process.GetExitCodeProcess(hproc)
             return rc
 
         options.set('delete_confirmation', False)
+        # We redirect the ShellExecuteEx call like this because if we do it in a mock we enter recursion
+        # because we call ShellExecuteEx in shell_execute_synchronous
         bleachbit.Windows.shell.ShellExecuteEx = shell_execute_synchronous
         with mock.patch('bleachbit.Windows.shell.IsUserAnAdmin', return_value=False):
             with mock.patch('bleachbit.GUI.sys.exit'):
-            # with mock.patch('bleachbit.Windows.shell.ShellExecuteEx') as mock_execute:
-            #     mock_execute.side_effect = shell_execute_synchronous
-                app = Bleachbit(auto_exit=True, shred_paths=[file_to_shred], uac=True)
+                Bleachbit(auto_exit=True, shred_paths=[file_to_shred], uac=True)
 
-        # import winsound
-        # frequency = 2500  # Set Frequency To 2500 Hertz
-        # duration = 50  # Set Duration To 1000 ms == 1 second
-        # winsound.Beep(frequency, duration)
         self.assertNotExists(file_to_shred)
-
