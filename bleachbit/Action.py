@@ -632,9 +632,15 @@ class Winreg(ActionProvider):
         ActionProvider.__init__(self, action_element, path_vars)
         self.keyname = action_element.getAttribute('path')
         self.name = action_element.getAttribute('name')
+        self.wholeregex = action_element.getAttribute('wholeregex')
+
+    def get_allowed_keys(self):
+        pass
 
     def get_commands(self):
         yield Command.Winreg(self.keyname, self.name)
+        # for keyname, name in self.get_allowed_keys():
+        #     yield Command.Winreg(keyname, name)
 
 
 class YumCleanAll(ActionProvider):

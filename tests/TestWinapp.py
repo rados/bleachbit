@@ -304,6 +304,11 @@ class WinappTestCase(common.BleachbitTestCase):
                 self.assertRaises(StopIteration, cleaner.__next__)
                 shutil.rmtree(dirname, True)
 
+    @common.skipUnlessWindows
+    def test_winreg(self):
+        (ini_h, self.ini_fn) = tempfile.mkstemp(
+            suffix='.ini', prefix='winapp2')
+        os.close(ini_h)
         # registry key, basic
         (dirname, fname1, fname2, fbak) = self.setup_fake()
         cleaner = self.ini2cleaner('RegKey1=%s' % KEYFULL)
@@ -313,6 +318,17 @@ class WinappTestCase(common.BleachbitTestCase):
         self.assertFalse(detect_registry_key(KEYFULL))
         shutil.rmtree(dirname, True)
 
+        subkey1 = KEYFULL + '\\deleteAlso1'
+        create_sub_key(subkey1)
+        subkey2 = KEYFULL + '\\deleteAlso1'
+        create_sub_key(subkey2)
+        (dirname, fname1, fname2, fbak) = self.setup_fake()
+        cleaner = self.ini2cleaner('RegKey1={}\nExcludeKey1={}'.format(KEYFULL, subkey1))
+        self.run_all(cleaner, True)
+        self.assertTrue(detect_registry_key(subkey1))
+        self.assertFalse(detect_registry_key(subkey2))
+        shutil.rmtree(dirname, True)
+
         # check for parse error with ampersand
         (dirname, fname1, fname2, fbak) = self.setup_fake()
         cleaner = self.ini2cleaner(
@@ -320,6 +336,8 @@ class WinappTestCase(common.BleachbitTestCase):
         self.run_all(cleaner, False)
         self.run_all(cleaner, True)
         shutil.rmtree(dirname, True)
+
+
 
     @common.skipUnlessWindows
     def test_excludekey(self):
