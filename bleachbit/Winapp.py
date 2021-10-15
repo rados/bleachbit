@@ -331,7 +331,7 @@ class Winapp:
             if option.startswith('filekey'):
                 self.handle_filekey(lid, section, option, excludekeys)
             elif option.startswith('regkey'):
-                self.handle_regkey(lid, section, option)#, excludekeys)
+                self.handle_regkey(lid, section, option, excludekeys)
             elif option == 'warning':
                 self.cleaners[lid].set_warning(
                     section2option(section), self.parser.get(section, 'warning'))
@@ -405,7 +405,7 @@ class Winapp:
                     self.cleaners[lid].add_action(
                         section2option(ini_section), provider)
 
-    def handle_regkey(self, lid, ini_section, ini_option):
+    def handle_regkey(self, lid, ini_section, ini_option, excludekeys):
         """Parse a RegKey# option"""
         elements = self.parser.get(
             ini_section, ini_option).strip().split('|')
@@ -413,7 +413,10 @@ class Winapp:
         name = ""
         if len(elements) == 2:
             name = 'name="%s"' % xml_escape(elements[1])
-        action_str = '<option command="winreg" path="%s" %s/>' % (path, name)
+
+        exclude_str = excludekeys[0] if excludekeys else ''
+        excludekeysxml = 'nwholeregex="%s"' % xml_escape(exclude_str)
+        action_str = '<option command="winreg" path="%s" %s %s/>' % (path, name, excludekeysxml)
         provider = Winreg(parseString(action_str).childNodes[0])
         self.cleaners[lid].add_action(section2option(ini_section), provider)
 

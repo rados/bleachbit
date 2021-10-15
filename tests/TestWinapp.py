@@ -318,15 +318,17 @@ class WinappTestCase(common.BleachbitTestCase):
         self.assertFalse(detect_registry_key(KEYFULL))
         shutil.rmtree(dirname, True)
 
-        subkey1 = KEYFULL + '\\deleteAlso1'
+        subkey1 = KEYFULL.split('\\', 1)[-1] + '\\deleteAlso1'
         create_sub_key(subkey1)
-        subkey2 = KEYFULL + '\\deleteAlso1'
+        subkey2 = KEYFULL.split('\\', 1)[-1] + '\\deleteAlso2'
         create_sub_key(subkey2)
         (dirname, fname1, fname2, fbak) = self.setup_fake()
-        cleaner = self.ini2cleaner('RegKey1={}\nExcludeKey1={}'.format(KEYFULL, subkey1))
+        subkey1_fullpath = '{}\\{}'.format(KEYFULL.split('\\', 1)[0], subkey1)
+        cleaner = self.ini2cleaner('RegKey1={}\nExcludeKey1=REG|{}'.format(KEYFULL, subkey1_fullpath))
         self.run_all(cleaner, True)
-        self.assertTrue(detect_registry_key(subkey1))
-        self.assertFalse(detect_registry_key(subkey2))
+        subkey2_fullpath = '{}\\{}'.format(KEYFULL.split('\\', 1)[0], subkey2)
+        self.assertFalse(detect_registry_key(subkey2_fullpath))
+        self.assertTrue(detect_registry_key(subkey1_fullpath))
         shutil.rmtree(dirname, True)
 
         # check for parse error with ampersand

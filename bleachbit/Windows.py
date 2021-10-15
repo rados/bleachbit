@@ -69,6 +69,11 @@ if 'win32' == sys.platform:
 logger = logging.getLogger(__name__)
 
 
+
+class RegistryKeyDoesNotExists(Exception):
+    pass
+
+
 def browse_file(_, title):
     """Ask the user to select a single file.  Return full path"""
     try:
@@ -185,28 +190,44 @@ def delete_registry_key(parent_key, really_delete):
     Return boolean whether found and success.  If really
     delete is False (meaning preview), just check whether
     the key exists."""
-    parent_key = str(parent_key)  # Unicode to byte string
+
+    try:
+        child_keys = get_child_registry_keys(parent_key)
+    except RegistryKeyDoesNotExists:
+        return False
+
+    if not really_delete:
+        return True
+
+    for child_key in child_keys:
+        delete_registry_key(child_key, True)
+
+    (hive, parent_sub_key) = split_registry_key(parent_key)
+    winreg.DeleteKey(hive, parent_sub_key)
+    return True
+
+
+def get_child_registry_keys(parent_key):
+    # split to two functions - one that checks if the key exists and one that finds its children
+    parent_key = str(parent_key) # Unicode to byte string
     (hive, parent_sub_key) = split_registry_key(parent_key)
     hkey = None
+
     try:
         hkey = winreg.OpenKey(hive, parent_sub_key)
     except WindowsError as e:
         if e.winerror == 2:
             # 2 = 'file not found' happens when key does not exist
-            return False
-    if not really_delete:
-        return True
+            raise RegistryKeyDoesNotExists
     if not hkey:
         # key not found
-        return False
+        raise RegistryKeyDoesNotExists
+
     keys_size = winreg.QueryInfoKey(hkey)[0]
     child_keys = [
         parent_key + '\\' + winreg.EnumKey(hkey, i) for i in range(keys_size)
     ]
-    for child_key in child_keys:
-        delete_registry_key(child_key, True)
-    winreg.DeleteKey(hive, parent_sub_key)
-    return True
+    return child_keys
 
 
 def delete_updates():

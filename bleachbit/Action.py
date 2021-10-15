@@ -25,7 +25,7 @@ Actions that perform cleaning
 
 from bleachbit import Command, FileUtilities, General, Special, DeepScan
 from bleachbit import _, fs_scan_re_flags
-from bleachbit.Windows import detect_registry_key
+from bleachbit.Windows import detect_registry_key, get_child_registry_keys, RegistryKeyDoesNotExists
 
 import glob
 import logging
@@ -33,7 +33,6 @@ import os
 import re
 if 'posix' == os.name:
     from bleachbit import Unix
-
 
 logger = logging.getLogger(__name__)
 
@@ -632,15 +631,25 @@ class Winreg(ActionProvider):
         ActionProvider.__init__(self, action_element, path_vars)
         self.keyname = action_element.getAttribute('path')
         self.name = action_element.getAttribute('name')
-        self.wholeregex = action_element.getAttribute('wholeregex')
+        self.nwholeregex = action_element.getAttribute('nwholeregex')
 
     def get_allowed_keys(self):
-        pass
+        if not self.nwholeregex:
+            return [self.keyname]
+
+        try:
+            child_keys = get_child_registry_keys(self.keyname)
+        except RegistryKeyDoesNotExists:
+            return []
+
+        child_keys = [
+            key for key in child_keys if key != self.nwholeregex.replace('\\\\', '\\')
+        ]
+        return child_keys
 
     def get_commands(self):
-        yield Command.Winreg(self.keyname, self.name)
-        # for keyname, name in self.get_allowed_keys():
-        #     yield Command.Winreg(keyname, name)
+        for keyname in self.get_allowed_keys():
+            yield Command.Winreg(keyname, self.name)
 
 
 class YumCleanAll(ActionProvider):
