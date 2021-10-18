@@ -68,6 +68,17 @@ def get_winapp2():
 class WinappTestCase(common.BleachbitTestCase):
     """Test cases for Winapp"""
 
+    def setUp(self):
+        """Initialize unit tests"""
+        super(WinappTestCase, self).setUp()
+
+        # reuse this path to store a winapp2.ini file in
+        self.ini_fn = self.mkstemp(
+            suffix='.ini', prefix='winapp2')
+
+    def tearDown(self):
+        super(WinappTestCase, self).tearDown()
+
     def run_all(self, cleaner, really_delete):
         """Test all the cleaner options"""
         for (option_id, __name) in cleaner.get_options():
@@ -203,11 +214,6 @@ class WinappTestCase(common.BleachbitTestCase):
     def test_fake(self):
         """Test with fake file"""
 
-        # reuse this path to store a winapp2.ini file in
-        (ini_h, self.ini_fn) = tempfile.mkstemp(
-            suffix='.ini', prefix='winapp2')
-        os.close(ini_h)
-
         # a set of tests
         # this map explains what each position in the test tuple means
         # 0=line to write directly to winapp2.ini
@@ -305,11 +311,7 @@ class WinappTestCase(common.BleachbitTestCase):
                 shutil.rmtree(dirname, True)
 
     @common.skipUnlessWindows
-    def test_winreg(self):
-        (ini_h, self.ini_fn) = tempfile.mkstemp(
-            suffix='.ini', prefix='winapp2')
-        os.close(ini_h)
-        # registry key, basic
+    def test_registry_key_basic(self):
         (dirname, fname1, fname2, fbak) = self.setup_fake()
         cleaner = self.ini2cleaner('RegKey1=%s' % KEYFULL)
         self.run_all(cleaner, False)
@@ -318,6 +320,16 @@ class WinappTestCase(common.BleachbitTestCase):
         self.assertFalse(detect_registry_key(KEYFULL))
         shutil.rmtree(dirname, True)
 
+        # check for parse error with ampersand
+        (dirname, fname1, fname2, fbak) = self.setup_fake()
+        cleaner = self.ini2cleaner(
+            'RegKey1=HKCU\\Software\\PeanutButter&Jelly')
+        self.run_all(cleaner, False)
+        self.run_all(cleaner, True)
+        shutil.rmtree(dirname, True)
+
+    @common.skipUnlessWindows
+    def test_registry_key_with_exclude_key(self):
         subkey1 = KEYFULL.split('\\', 1)[-1] + '\\deleteAlso1'
         create_sub_key(subkey1)
         subkey2 = KEYFULL.split('\\', 1)[-1] + '\\deleteAlso2'
@@ -331,24 +343,9 @@ class WinappTestCase(common.BleachbitTestCase):
         self.assertTrue(detect_registry_key(subkey1_fullpath))
         shutil.rmtree(dirname, True)
 
-        # check for parse error with ampersand
-        (dirname, fname1, fname2, fbak) = self.setup_fake()
-        cleaner = self.ini2cleaner(
-            'RegKey1=HKCU\\Software\\PeanutButter&Jelly')
-        self.run_all(cleaner, False)
-        self.run_all(cleaner, True)
-        shutil.rmtree(dirname, True)
-
-
-
     @common.skipUnlessWindows
     def test_excludekey(self):
         """Test for ExcludeKey"""
-
-        # reuse this path to store a winapp2.ini file in
-        (ini_h, self.ini_fn) = tempfile.mkstemp(
-            suffix='.ini', prefix='winapp2')
-        os.close(ini_h)
 
         # tests
         # each tuple
@@ -485,10 +482,6 @@ class WinappTestCase(common.BleachbitTestCase):
             (r'FileKey1=%s\dir_c\doesnotexist*|*.*|REMOVESELF' % self.tempdir, True, '')
         )
 
-        (ini_h, self.ini_fn) = tempfile.mkstemp(
-            suffix='.ini', prefix='winapp2')
-        os.close(ini_h)
-
         for filekey, c_log_expected, top_log_expected in tests:
             for letter in ('a', 'b', 'c'):
                 # Make three directories, each with a `foo.log` file.
@@ -541,10 +534,6 @@ class WinappTestCase(common.BleachbitTestCase):
             for i_f in range(1, file_count+1):
                 tmp_fn = os.path.join(sub_dir, 'file%d' % i_f)
                 common.touch_file(tmp_fn)
-
-        (ini_h, self.ini_fn) = tempfile.mkstemp(
-            suffix='.ini', prefix='winapp2')
-        os.close(ini_h)
 
         import string
         searches = ';'.join(
