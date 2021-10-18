@@ -76,9 +76,6 @@ class WinappTestCase(common.BleachbitTestCase):
         self.ini_fn = self.mkstemp(
             suffix='.ini', prefix='winapp2')
 
-    def tearDown(self):
-        super(WinappTestCase, self).tearDown()
-
     def run_all(self, cleaner, really_delete):
         """Test all the cleaner options"""
         for (option_id, __name) in cleaner.get_options():
