@@ -437,6 +437,21 @@ class WinappTestCase(common.BleachbitTestCase):
             shutil.rmtree(dirname, True)
 
     @common.skipUnlessWindows
+    def test_filekey_with_path_including_systemdrive(self):
+        """
+        There is similar
+        """
+        (ini_h, self.ini_fn) = tempfile.mkstemp(
+            suffix='.ini', prefix='winapp2')
+        os.close(ini_h)
+        filename = os.path.join('c:\\', 'deleteme.txt')
+        open(filename, 'w').close()
+        self.assertExists(filename)
+        cleaner = self.ini2cleaner('FileKey1=%SystemDrive%|deleteme.txt')
+        self.run_all(cleaner, True)
+        self.assertNotExists(filename)
+
+    @common.skipUnlessWindows
     def test_removeself(self):
         """Test for the removeself option"""
 
