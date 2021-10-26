@@ -24,6 +24,7 @@ Test cases for module Winapp
 import os
 import shutil
 import tempfile
+from unittest import mock
 
 from tests import common
 from bleachbit.Winapp import Winapp, detectos, detect_file, section2option
@@ -193,7 +194,7 @@ class WinappTestCase(common.BleachbitTestCase):
         ini.write(body)
         ini.write('\n')
         ini.close()
-        self.assertExists(self.ini_fn)
+        # self.assertExists(self.ini_fn)
         if do_next:
             return next(Winapp(self.ini_fn).get_cleaners())
         else:
@@ -438,17 +439,26 @@ class WinappTestCase(common.BleachbitTestCase):
 
     @common.skipUnlessWindows
     def test_filekey_with_path_including_systemdrive(self):
-        """
-        There is similar
-        """
         (ini_h, self.ini_fn) = tempfile.mkstemp(
             suffix='.ini', prefix='winapp2')
         os.close(ini_h)
+        # lexists(r'C:filename') returns False
+        # FindFilesW(r'C:filename') throws in exception
+        # So assert that we call both functions with r'C:\filename'.
+        # We need this test because winapp2.ini supports such paths and
+        # giving r'C:filename' as argument to lexists or FindFilesW
+        # causes a hard to detect issue, which has been detected because
+        # lexists('C:filename') returns True when called through PyCharm.
+
         filename = os.path.join('c:\\', 'deleteme.txt')
         open(filename, 'w').close()
         self.assertExists(filename)
-        cleaner = self.ini2cleaner('FileKey1=%SystemDrive%|deleteme.txt')
-        self.run_all(cleaner, True)
+
+        with mock.patch('os.path.lexists') as mock_lexists:
+            cleaner = self.ini2cleaner('FileKey1=%SystemDrive%|deleteme.txt')
+            self.run_all(cleaner, True)
+            mock_lexists.assert_any_call(r'C:\deleteme.txt')
+
         self.assertNotExists(filename)
 
     @common.skipUnlessWindows
