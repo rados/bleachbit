@@ -194,7 +194,7 @@ class WinappTestCase(common.BleachbitTestCase):
         ini.write(body)
         ini.write('\n')
         ini.close()
-        # self.assertExists(self.ini_fn)
+        self.assertExists(self.ini_fn)
         if do_next:
             return next(Winapp(self.ini_fn).get_cleaners())
         else:
