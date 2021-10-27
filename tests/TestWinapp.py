@@ -453,7 +453,7 @@ class WinappTestCase(common.BleachbitTestCase):
         # such paths but it doesn't assert if those cleaners actually
         # clean their targets.
 
-        filename = os.path.join('c:\\', 'deleteme.txt')
+        filename = os.path.join('C:\\', 'deleteme.txt')
         open(filename, 'w').close()
         self.assertExists(filename)
 
