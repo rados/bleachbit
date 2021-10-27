@@ -443,12 +443,15 @@ class WinappTestCase(common.BleachbitTestCase):
             suffix='.ini', prefix='winapp2')
         os.close(ini_h)
         # lexists(r'C:filename') returns False
-        # FindFilesW(r'C:filename') throws in exception
-        # So assert that we call both functions with r'C:\filename'.
+        # FindFilesW(r'C:filename') throws an exception
+        # So assert that we use r'C:\filename'.
         # We need this test because winapp2.ini supports such paths and
         # giving r'C:filename' as argument to lexists or FindFilesW
         # causes a hard to detect issue, which has been detected because
         # lexists('C:filename') returns True when called through PyCharm.
+        # Also test_remote is supposed to run cleaners that contain
+        # such paths but it doesn't assert if those cleaners actually
+        # clean their targets.
 
         filename = os.path.join('c:\\', 'deleteme.txt')
         open(filename, 'w').close()
